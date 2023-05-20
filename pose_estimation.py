@@ -1,4 +1,4 @@
-video_file = "./video.mp4"
+video_file = "video.mp4"
 import cv2
 import mediapipe as mp
 import math
@@ -25,6 +25,10 @@ def calculate_angle(a, b, c):
     """Calculate the angle between three points"""
     angle_rad = math.atan2(c.y - b.y, c.x - b.x) - math.atan2(a.y - b.y, a.x - b.x)
     angle_deg = math.degrees(angle_rad)
+    if angle_deg < 0:
+        angle_deg += 360
+    if angle_deg > 180:
+        angle_deg = 360 - angle_deg
     return angle_deg
 
 def main():
@@ -113,7 +117,7 @@ def main():
             text_x = int((frame_camera.shape[1] - text_size[0]) / 2)
             cv2.putText(frame_camera, text, (text_x, frame_camera.shape[0] - 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
             if angle_file and angle_camera:
-                angle_diff = angle_file - angle_camera
+                angle_diff = ((angle_camera / angle_file) * 100) - 100
                 if abs(angle_diff) > 30:
                     text_color = (0, 0, 255)
                 else:
