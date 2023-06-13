@@ -31,6 +31,30 @@ def calculate_angle(a, b, c):
         angle_deg = 360 - angle_deg
     return angle_deg
 
+def delta(a, b, c):
+    # Determine the position of a point regarding the line determined by another two points
+    return a.x*b.y+b.x*c.y+c.x*a.y-a.x*c.y-b.x*a.y-c.x*b.y
+
+def distance2(a, b):
+    # Calculate the euclidean distance between two points
+    return (a.x-b.x)**2+(a.y-b.y)**2
+
+def distance(a, b):
+    # Calculate the euclidean distance between two points
+    return math.sqrt(distance2(a, b))
+
+def angle(a, b, c):
+    # Calculate the measure of the angle B 
+    # that is between two lines (AB and BC) 
+    # determined by three points (A, B, C)
+    # using the cosine theorem
+    if distance2(a, b)*distance2(b, c) == 0:
+        return 0
+    the_angle = math.degrees(math.acos((distance2(a, b)+distance2(b, c)-distance2(a, c))/(2*distance(a, b)*distance(b, c))))
+    if delta(a, b, c) > 0:
+        return 360-the_angle
+    return the_angle
+
 def main():
     # Video capture from file
     cap_file = cv2.VideoCapture(video_file)
@@ -89,7 +113,10 @@ def main():
             left_hip = results_file.pose_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_HIP]
             left_knee = results_file.pose_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_KNEE]
             left_ankle = results_file.pose_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ANKLE]
-            angle_file = calculate_angle(left_hip, left_knee, left_ankle)
+            # old formula
+            #angle_file = calculate_angle(left_hip, left_knee, left_ankle)
+            # new formula
+            angle_file = angle(left_hip, left_knee, left_ankle)
             text = f"KNEE ANGLE: {angle_file:.2f}"
             text_size, _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 1, 2)
             text_x = int((frame_file.shape[1] - text_size[0]) / 2)
@@ -110,8 +137,11 @@ def main():
             # Calculate and display the angle of the knee joint
             left_hip = results_camera.pose_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_HIP]
             left_knee = results_camera.pose_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_KNEE]
-            left_ankle = results_camera.pose_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ANKLE]
-            angle_camera = calculate_angle(left_hip, left_knee, left_ankle)
+            left_ankle = results_camera.pose_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ANKLE]            
+            # old formula
+            # angle_camera = calculate_angle(left_hip, left_knee, left_ankle)
+            # new formula
+            angle_camera = angle(left_hip, left_knee, left_ankle)
             text = f"KNEE ANGLE: {angle_camera:.2f}"
             text_size, _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 1, 2)
             text_x = int((frame_camera.shape[1] - text_size[0]) / 2)
